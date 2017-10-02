@@ -1,0 +1,4 @@
+load('~/Desktop/patient1matrix.Rdata')
+ls()
+svd(patient1)
+svd1$d
