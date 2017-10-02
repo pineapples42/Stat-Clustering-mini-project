@@ -2,3 +2,133 @@ load('~/Desktop/patient1matrix.Rdata')
 ls()
 svd(patient1)
 svd1$d
+load('~/Desktop/patient1matrix.Rdata')
+ls()
+svd1 <- svd(patient1)
+svd1$d
+kmtest <- kmeans(patient1, 1)
+kmtest
+kmbss <- c()#
+kmtss <- c()#
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmtss <- c(kmtss, km$totss)#
+}
+kmbss
+kmtss
+plot(kmbss, kmtss)
+kmbss <- c()#
+kmwss <- c()#
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmtss <- c(kmtss, km$withinss)#
+}
+kmbss <- c()#
+kmwss <- c()#
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmtss <- c(kmtss, km$withinss)#
+}
+kmbss
+kmwss
+kmbss <- c()#
+kmwss <- c()#
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, km$withinss)#
+}
+kmwss
+kmbss
+kmwss <- c()
+kmwss
+# for loop attempt#
+kmbss <- c()#
+kmwss <- c()
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, km$withinss)#
+}
+plot(kmbss, kmwss)
+kmbss <- c()#
+kmwss <- c()
+for (i in 1:12) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+}
+plot(kmbss, kmwss)
+plot(kmbss, kmwss, scale=log)
+patient1scaled <- scale(patient1)
+kmbss <- c()#
+kmwss <- c()#
+for (i in 1:20) {#
+	km <- kmeans(patient1scaled, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+}
+kmbss <- c()#
+kmwss <- c()#
+for (i in 1:20) {#
+	km <- kmeans(patient1scaled, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+}
+plot(kmbss, kmwss)
+kmscore <- kmwss / kmbss
+plot(kmscore)
+kmscore
+plot(kmscore)
+kmbss <- c()#
+kmwss <- c()#
+kmtss <- c()#
+for (i in 1:20) {#
+	km <- kmeans(patient1scaled, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+	kmtss <- c(kmtss, km$totss)#
+}
+kmscore <- kmwss / kmtss#
+kmscore#
+plot(kmscore)
+kmbss <- c()#
+kmwss <- c()#
+kmtss <- c()#
+for (i in 2:30) {#
+	km <- kmeans(patient1scaled, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+	kmtss <- c(kmtss, km$totss)#
+}#
+kmscore <- kmwss / kmtss#
+kmscore#
+plot(kmscore)
+kmbss <- c()#
+kmwss <- c()#
+kmtss <- c()#
+for (i in 2:30) {#
+	km <- kmeans(patient1, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+	kmtss <- c(kmtss, km$totss)#
+}#
+kmscore <- kmwss / kmtss#
+kmscore#
+plot(kmscore)
+kmbss <- c()#
+kmwss <- c()#
+kmtss <- c()#
+for (i in 2:30) {#
+	km <- kmeans(patient1scaled, i)#
+	kmbss <- c(kmbss, km$betweenss)#
+	kmwss <- c(kmwss, mean(km$withinss))#
+	kmtss <- c(kmtss, km$totss)#
+}#
+kmscore <- kmwss / kmtss#
+kmscore#
+plot(kmscore)
+kmscore

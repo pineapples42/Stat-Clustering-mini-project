@@ -16,12 +16,26 @@ patient1scaled <- scale(patient1)
 kmbss <- c()
 kmwss <- c()
 kmtss <- c()
-for (i in 1:20) {
+for (i in 2:30) {
 	km <- kmeans(patient1scaled, i)
 	kmbss <- c(kmbss, km$betweenss)
 	kmwss <- c(kmwss, mean(km$withinss))
 	kmtss <- c(kmtss, km$totss)
 }
-kmscore <- kmwss / kmtss
+kmscore <- kmbss / kmtss
+kmscore
+plot(kmscore)
+
+# unscaled data
+kmbss <- c()
+kmwss <- c()
+kmtss <- c()
+for (i in 2:30) {
+	km <- kmeans(patient1, i)
+	kmbss <- c(kmbss, km$betweenss)
+	kmwss <- c(kmwss, mean(km$withinss))
+	kmtss <- c(kmtss, km$totss)
+}
+kmscore <- kmbss / kmtss
 kmscore
 plot(kmscore)
