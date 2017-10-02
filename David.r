@@ -1,7 +1,7 @@
 # Load the matrix for patient one (adapted from flowframe)
 load('~/Desktop/patient1matrix.Rdata')
 
-# list activated data
+# list active dataframes
 ls()
 
 svd1 <- svd(patient1)
@@ -9,10 +9,8 @@ svd1$d
 
 kmtest <- kmeans(patient1, 1)
 
-# scale the data
+# scaled data elbow hunt
 patient1scaled <- scale(patient1)
-
-# for loop attempt
 kmbss <- c()
 kmwss <- c()
 kmtss <- c()
@@ -23,10 +21,10 @@ for (i in 2:30) {
 	kmtss <- c(kmtss, km$totss)
 }
 kmscore <- kmbss / kmtss
-kmscore
-plot(kmscore)
+kmscorescaled
+plot(kmscorescaled)
 
-# unscaled data
+# unscaled data elbow hunt
 kmbss <- c()
 kmwss <- c()
 kmtss <- c()
