@@ -4,6 +4,7 @@ library(flowCore)
 #     instead of summary(person5), use summary(people[[5]]) (double square brackets are neccesary)
 #     people[[5]]$FSC.H
 #     kmeans(people[[5]], 3)
+#     plot(people[[1]]$FSC.H, people[[1]]$SSC.H)
 # Add your own folder path in folder 
 folder = '/home/persimmon/Documents/project/'
 people = list()
