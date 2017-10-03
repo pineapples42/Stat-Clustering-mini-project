@@ -1,14 +1,26 @@
-# Load the matrix for patient one (adapted from flowframe)
-load('~/Desktop/patient1matrix.Rdata')
+# load the patient1 datframe first
 
-# list active dataframes
-ls()
+# THE ELBOW METHOD
+patient1scaled <- scale(patient1)
 
-svd1 <- svd(patient1)
-svd1$d
+kmscore <- c()
 
-kmtest <- kmeans(patient1, 1)
+for (i in 1:30) {
+	km <- kmeans(patient1scaled, i, iter.max = 20)
+	kmscore <- c(kmscore, km$betweenss / km$totss)
+}
 
+# the kmscore is a vector of the f-test results 
+# (group variation / total variation)
+# we plot it to look for a drop in the marginal gain
+
+plot(kmscore)
+
+
+
+
+
+# BELOW THIS BE OLD THINGS
 # scaled data elbow hunt
 patient1scaled <- scale(patient1)
 kmbss <- c()
@@ -37,3 +49,20 @@ for (i in 2:30) {
 kmscore <- kmbss / kmtss
 kmscore
 plot(kmscore)
+
+# FOR LOOP WITH EXTRA STUFF
+patient1scaled <- scale(patient1)
+
+kmscore <- c()
+kmbetweenss <- c()
+kmtotss <- c()
+kmmeanwithinss <- c()
+
+for (i in 1:30) {
+	km <- kmeans(patient1scaled, i, iter.max = 20)
+	kmscore <- c(kmscore, km$betweenss / km$totss)
+	kmbetweenss <- c(kmbetweenss, km$betweenss)
+	kmtotss <- c(kmtotss, km$totss)
+	kmmeanwithinss <- c(kmmeanwithinss, mean(km$withinss))
+}
+
