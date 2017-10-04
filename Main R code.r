@@ -18,6 +18,17 @@ people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
 
+#Adding manual gated results to dataframe
+for(i in 1:9){
+  targets = as.matrix(read.csv(paste(c(folder,'00',as.character(i),'.csv'), collapse = '')))
+  people[[i]]$Targets = targets
+}
+targets = as.matrix(read.csv(paste(c(folder,'010.csv'), collapse = '')))
+people[[10]]$Targets = targets
+targets = as.matrix(read.csv(paste(c(folder,'011.csv'), collapse = '')))
+people[[11]]$Targets = targets
+targets = as.matrix(read.csv(paste(c(folder,'012.csv'), collapse = '')))
+people[[12]]$Targets = targets
 
 # K-means For Loop with F-Test
 scores = list()
