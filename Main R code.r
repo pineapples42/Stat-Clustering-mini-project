@@ -17,3 +17,17 @@ for(i in 1:9){
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'010.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
+
+# K-means For Loop with F-Test
+scores = list()
+clusters = list()
+for(person in people){
+    person.scaled <- scale(person)
+    kmscore <- c()
+    for (k in 1:30) {
+        km <- kmeans(person.scaled, k, iter.max = 20)
+        kmscore <- c(kmscore, km$betweenss / km$totss)
+    scores <- append(scores, list(kmscore))
+    clusters <- append(clusters, list(km$clusters))
+    }
+}
