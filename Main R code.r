@@ -6,7 +6,7 @@ library(flowCore)
 #     kmeans(people[[5]], 3)
 #     plot(people[[1]]$FSC.H, people[[1]]$SSC.H)
 # Add your own folder path in folder 
-folder = '/home/persimmon/Documents/project/'
+folder = '/Users/david/Documents/GitHub/Stat-Clustering-mini-project/FlowCore Data/'
 people = list()
 file = '1'
 ext = '.fcs'
@@ -18,6 +18,7 @@ people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
 
+
 # K-means For Loop with F-Test
 scores = list()
 clusters = list()
@@ -27,7 +28,7 @@ for(person in people){
     for (k in 1:30) {
         km <- kmeans(person.scaled, k, iter.max = 20)
         kmscore <- c(kmscore, km$betweenss / km$totss)
-    scores <- append(scores, list(kmscore))
-    clusters <- append(clusters, list(km$clusters))
-    }
+	}
+    scores <- c(list(kmscore), scores)
+    clusters <- c(list(km$cluster), clusters)
 }
