@@ -43,3 +43,9 @@ for(person in people){
     scores <- c(list(kmscore), scores)
     clusters <- c(list(km$cluster), clusters)
 }
+
+# Plotting the elbow
+par(mfrow = c(3,4))
+for(i in 1:12){
+	plot(scores[[i]])
+}
