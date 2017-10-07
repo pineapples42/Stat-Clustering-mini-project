@@ -17,3 +17,16 @@ for(i in 1:9){
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'010.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
+
+# function that creates a matrix to display our kmeans clusters vs true clusters
+# Clusters must start with 1 and not 0 so just add one to the true cluster vector first
+eval_matrix = function(a, b, n_clusters = 5){
+  df = data.frame(a,b)
+  matrix = matrix(NA, nrow = n_clusters, ncol = n_clusters)
+  for(i in 1:n_clusters){
+    for(j in 1:n_clusters){
+      matrix[i,j] = length(df[1][df[2] == i & df[1] == j])
+    }
+  }
+  return(matrix)
+}
