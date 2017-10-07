@@ -1,14 +1,15 @@
 load("/Users/david/Documents/GitHub/Stat-Clustering-mini-project/dataframe.rdata")
+library(ClusterR)
 
 # Create a list of the number of levels for each patient to be used as k
 nlevels <- c()
-for(i in 1:12){
+for (i in 1:12) {
 	obj <- factor(people[[i]]$Targets)
 	nlevels <- c(nlevels, nlevels(obj))
-	}
+}
 
 # For each patient:
-for(i in 1:12){
+for (i in 1:12) {
 	# Create a subset for the patient
 	patient <- people[[i]]
 	# Clean the zero rows from the patient
@@ -18,12 +19,19 @@ for(i in 1:12){
 	# Scale the data for cleaner results
 	patient.scaled <- scale(patient.raw)
 	# Run kmeans using nlevels vector from earlier
-	km <- kmeans(patient.scaled, nlevels[i]-1)
+	km <- kmeans(patient.scaled, nlevels[i] - 1)
 	# Add kmeans predictions to scaled dataframe
 	patient.scaled$Predicted <- km$cluster
 	# Return actual values to scaled dataframe
 	patient.scaled$Targets <- patient.clean$Targets
 	# Create a confusion matrix for the dataframe & print it
 	conMatrix <- table(patient.scaled$Predicted, patient.scaled$Targets)
+	retrieved <- sum(patient.scaled$Predicted)
+	precision <- sum(patient.scaled$Predicted & patient.scaled$Targets)/retrieved
+	recall <- sum(patient.scaled$Predicted & patient.scaled$Targets)/sum(patient.scaled$Targets)
+	Fmeasure <- 2 * precision * recall/(precision + recall)
 	print(conMatrix)
-	}
+	print(Fmeasure)
+	nmi <- external_validation(patient.scaled$Targets, patient.scaled$Predicted, method = "nmi")
+	print(nmi)
+}
