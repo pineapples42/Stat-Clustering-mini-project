@@ -103,3 +103,9 @@ for (i in 1:12){
 	  zlab = "FL1.H"
 	)
 }
+
+# Save patient data in separate files
+folder = '/Users/david/Documents/GitHub/Stat-Clustering-mini-project/Patient Data/'
+for(i in 1:12){
+	save(people[[i]], file = paste(folder, "Patient", i, ".Rdata", sep=""))
+}
