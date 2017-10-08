@@ -46,7 +46,8 @@ people[[11]]$Targets = targets
 targets = as.matrix(read.csv(paste(c(folder,'012.csv'), collapse = '')))
 people[[12]]$Targets = targets
 
-# Running Kmeans with the factor levels given by the manual gates
+# Running Kmeans with the factor levels given by the manual gates.
+# Updates people dataframe with new predicted and actual scores.
 f.measure <- function(predicted, true) {
 	retrieved <- sum(predicted)
 	precision <- sum(predicted & true)/retrieved
@@ -78,6 +79,8 @@ for (i in 1:12){
 	patient.z$Predict <- integer(length(patient.z$Actual))
 	
 	patient.new <- rbind(patient.new, patient.z)
+	
+	people[[i]] <- patient.new
 	
 	conMatrix <- table(patient.new$Predict, patient.new$Actual)
 	print(conMatrix)
