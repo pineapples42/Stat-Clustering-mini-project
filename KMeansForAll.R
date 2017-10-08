@@ -1,5 +1,5 @@
 # Clusters with measures of accuracy, for all the patients
-# Load the dataframe.dataframe file first so that you have the peope object
+# Load the dataframe.dataframe file first so that you have the people object
 
 f.measure <- function(predicted, true) {
 	retrieved <- sum(predicted)
@@ -32,11 +32,13 @@ for (i in 1:12){
 	
 	patient.new <- rbind(patient.new, patient.z)
 	
+	print(paste("Patient", i, sep = " "))
+	
 	conMatrix <- table(patient.new$Predict, patient.new$Actual)
 	print(conMatrix)
 	
-	f.measure(patient.new$Predict, patient.new$Actual)
-	print(Fmeasure)
+	fmeasure <- f.measure(patient.new$Predict, patient.new$Actual)
+	print(fmeasure)
 	
 	nmi <- external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 	print(nmi)
