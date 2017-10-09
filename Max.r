@@ -65,3 +65,25 @@ for(i in 1:6){
     c = c+1
   }
 }
+#HERE
+data = load('/home/persimmon/Documents/project/dataframe.rdata')
+#combining all people into one dataframe
+everyone = people[[1]]
+for(i in 2:12){
+  everyone = rbind(everyone, people[[i]])
+}
+# Removing 0's rows
+everyone = everyone[everyone$Targets != 0, ]
+y = everyone$Targets
+everyone = everyone[,1:6]
+
+c = 7
+for(i in 1:6){
+  for(j in 1:6){
+    everyone[,c] = everyone[,j] * everyone[,i]
+    c = c+1
+  }
+}
+km = kmeans(everyone, 5)
+library(ClusterR)
+nmi = external_validation(y[1:10000], km$cluster[1:10000], method = 'nmi')
