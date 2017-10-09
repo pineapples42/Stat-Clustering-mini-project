@@ -18,15 +18,28 @@ people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
 people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
 
-# function that creates a matrix to display our kmeans clusters vs true clusters
-# Clusters must start with 1 and not 0 so just add one to the true cluster vector first
-eval_matrix = function(a, b, n_clusters = 5){
-  df = data.frame(a,b)
-  matrix = matrix(NA, nrow = n_clusters, ncol = n_clusters)
-  for(i in 1:n_clusters){
-    for(j in 1:n_clusters){
-      matrix[i,j] = length(df[1][df[2] == i & df[1] == j])
-    }
-  }
-  return(matrix)
+# grouping together all patients into one dataframe
+everyone = people[[1]]
+for(i in 2:12){
+  everyone = rbind(everyone, people[[i]])
 }
+# Removing 0's rows
+everyone = everyone[everyone$Targets != 0, ]
+
+# Testing whether scaling data improves results (It does)
+not_scaled_nmi = c()
+for(i in 1:20){
+  km = kmeans((everyone[,1:6]), 5)
+  nmi = external_validation(everyone$Targets[1:10000], km$cluster[1:10000], method = 'nmi')
+  not_scaled_nmi = c(not_scaled_nmi, nmi)
+}
+scaled_nmi = c()
+for(i in 1:20){
+  km = kmeans(scale(everyone[,1:6]), 5)
+  nmi = external_validation(everyone$Targets[1:10000], km$cluster[1:10000], method = 'nmi')
+  scaled_nmi = c(scaled_nmi, nmi)
+}
+# roughly 2% nmi accuracy increase 
+# > mean(scaled_nmi);mean(not_scaled_nmi)
+# [1] 0.6827666
+# [1] 0.6609856
