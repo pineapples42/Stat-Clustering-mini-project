@@ -55,3 +55,13 @@ for(i in 1:12){
 nmi_all;mean(nmi_all)
 # the average nmi score tends to be around 55%, much worse than when 
 # all patients were clustered all at once
+
+# Feature engineering
+# Running k-means on this all-patient, zero's-removed, expanded, then scaled dataframe gives us an nmi of around 83%
+c = 7
+for(i in 1:6){
+  for(j in 1:6){
+    everyone[,c] = everyone[,j] * everyone[,i]
+    c = c+1
+  }
+}
