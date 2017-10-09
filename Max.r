@@ -43,3 +43,15 @@ for(i in 1:20){
 # > mean(scaled_nmi);mean(not_scaled_nmi)
 # [1] 0.6827666
 # [1] 0.6609856
+
+# running kmeans seperately on each person
+nmi_all = c()
+for(i in 1:12){
+  person = people[[i]][people[[i]]$Targets != 0, ]
+  km = kmeans(scale(person[,1:6]), length(table(person$Targets)))
+  nmi = external_validation(person$Targets[1:10000], km$cluster[1:10000], method = 'nmi')
+  nmi_all = c(nmi_all, nmi)
+}
+nmi_all;mean(nmi_all)
+# the average nmi score tends to be around 55%, much worse than when 
+# all patients were clustered all at once
