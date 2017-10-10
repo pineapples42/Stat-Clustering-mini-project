@@ -92,6 +92,7 @@ for(i in 1:12){
   scaled_global = c(scaled_global, scores[1])
   not_scaled_global = c(not_scaled_global, scores[2])
 }
+#Polynomial feature creation
 poly = function(a){
 c = 7
 for(i in 1:6){
@@ -101,4 +102,11 @@ for(i in 1:6){
   }
 }
 return(a)
+}
+# Sliced NMI for an Everyone Dataframe
+nmi_vector = c()
+for(i in 1:((length(everyone$FSC.H))/1000)){
+  x = (i*1000):((i+1)*1000)
+  nmi = external_validation(km$cluster[x], everyone$Targets[x], method = 'nmi')
+  nmi_vector = c(nmi_vector, nmi)
 }
