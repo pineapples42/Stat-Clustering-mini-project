@@ -92,3 +92,13 @@ for(i in 1:12){
   scaled_global = c(scaled_global, scores[1])
   not_scaled_global = c(not_scaled_global, scores[2])
 }
+poly = function(a){
+c = 7
+for(i in 1:6){
+  for(j in 1:6){
+    a[,c] = a[,j] * a[,i]
+    c = c+1
+  }
+}
+return(a)
+}
