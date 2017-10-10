@@ -65,25 +65,30 @@ for(i in 1:6){
     c = c+1
   }
 }
-#HERE
-data = load('/home/persimmon/Documents/project/dataframe.rdata')
-#combining all people into one dataframe
-everyone = people[[1]]
-for(i in 2:12){
-  everyone = rbind(everyone, people[[i]])
-}
-# Removing 0's rows
-everyone = everyone[everyone$Targets != 0, ]
-y = everyone$Targets
-everyone = everyone[,1:6]
+# Tests of Scaled vs Unscaled part II
+scaled_global = c()
+not_scaled_global = c()
 
-c = 7
-for(i in 1:6){
-  for(j in 1:6){
-    everyone[,c] = everyone[,j] * everyone[,i]
-    c = c+1
-  }
+scale_eval = function(person,y){
+not_scaled_nmi = c()
+for(i in 1:40){
+  km = kmeans((person), 3)
+  nmi = external_validation(y, km$cluster, method = 'nmi')
+  not_scaled_nmi = c(not_scaled_nmi, nmi)
 }
-km = kmeans(everyone, 5)
-library(ClusterR)
-nmi = external_validation(y[1:10000], km$cluster[1:10000], method = 'nmi')
+scaled_nmi = c()
+for(i in 1:40){
+  km = kmeans(scale(person), 3)
+  nmi = external_validation(y, km$cluster, method = 'nmi')
+  scaled_nmi = c(scaled_nmi, nmi)
+}
+return(c(mean(scaled_nmi), mean(not_scaled_nmi)))
+}
+
+for(i in 1:12){
+  person = people[[i]][,1:6]
+  y = people[[i]]$Targets
+  scores = scale_eval(person, y)
+  scaled_global = c(scaled_global, scores[1])
+  not_scaled_global = c(not_scaled_global, scores[2])
+}
