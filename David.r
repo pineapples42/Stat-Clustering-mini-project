@@ -1,5 +1,62 @@
 # load the patient1 datframe first
 
+# This takes Kmeans of the polynomial feature augmented matrix
+par(mfrow = c(3,4))
+nmilist <- c()
+for (count in 1:12){
+	patient <- people[[count]]
+	patient.clean <- subset(patient, Targets > 0)
+	patient.raw <-
+	  patient.clean[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+	
+	c = 7
+	for(i in 1:6){
+		for(j in 1:6){
+			patient.raw[,c] <- patient.raw[,j] * patient.raw[,i]
+			c = c+1
+		}
+	}
+	
+	patient.raw <- as.data.frame(scale(patient.raw))
+	
+	
+	k <- nlevels(factor(patient.clean$Targets))
+	km <- kmeans(patient.raw, k)
+	
+	patient.new <- as.data.frame(patient.raw[,1:6])
+	patient.new$Predict <- km$cluster
+	patient.new$Actual <- as.integer(patient.clean$Targets)
+	
+    print(paste("Patient", count, sep = " "))
+
+    conMatrix <- table(patient.new$Predict, patient.new$Actual)
+    print(conMatrix)
+
+    #fmeasure <- f.measure(patient.new$Predict, patient.new$Actual)
+    #print(fmeasure)
+
+	nmi <- external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+	nmilist <- c(nmilist, nmi)
+	print(nmi)
+	
+	patient.sample <- patient.new[sample(nrow(patient.new), 300),]
+	
+    scatterplot3d(
+      patient.sample$FSC.H,
+      patient.sample$SSC.H,
+      patient.sample$FL1.H,
+      color = patient.sample$Predict,
+      pch = patient.sample$Actual,
+      main = paste("Patient", count, sep = " "),
+      xlab = "FSC.H",
+      ylab = "SSC.H",
+      zlab = "FL1.H"
+    )
+}
+mean(nmilist)
+
+# STOP HERE
+
 # THE ELBOW METHOD
 patient1scaled <- scale(patient1)
 
@@ -17,8 +74,27 @@ for (i in 1:30) {
 plot(kmscore)
 
 
+# Playing around with everyone
+everyone = people[[1]]
+for(i in 2:12){
+	everyone = rbind(everyone, people[[i]])
+}
 
+everyone = everyone[everyone$Targets != 0, ]
 
+c = 7
+for(i in 1:6){
+	for(j in 1:6){
+		everyone[,c] = everyone[,j] * everyone[,i]
+		c = c+1
+	}
+}
+
+everyone.scaled <- as.data.frame(scale(everyone[,c(1:6, 8:42)]))
+
+km <- kmeans(everyone.scaled, nlevels(factor(everyone$Targets)), iter.max = 30)
+
+nmi <- external_validation
 
 # BELOW THIS BE OLD THINGS
 # scaled data elbow hunt
