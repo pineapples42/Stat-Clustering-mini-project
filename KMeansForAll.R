@@ -17,13 +17,13 @@ for (count in 1:12){
 	patient.raw <-
 	  patient.clean[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
 	
-	c = 7
-	for(i in 1:6){
-		for(j in 1:6){
-			patient.raw[,c] <- patient.raw[,j] * patient.raw[,i]
-			c = c+1
-		}
-	}
+#	c = 7
+#	for(i in 1:6){
+#		for(j in 1:6){
+#			patient.raw[,c] <- patient.raw[,j] * patient.raw[,i]
+#			c = c+1
+#		}
+#	}
 	
 	patient.raw <- as.data.frame(scale(patient.raw))
 	

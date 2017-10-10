@@ -5,34 +5,31 @@ patient <- people[[10]]
 patient.raw <-
   patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
 	
-#c = 7
-#for(i in 1:6){
-#	for(j in 1:6){
-#		patient.raw[,c] <- patient.raw[,j] * patient.raw[,i]
-#		c = c+1
-#	}
-#}
+c = 7
+for(i in 1:6){
+	for(j in 1:6){
+		patient.raw[,c] <- patient.raw[,j] * patient.raw[,i]
+		c = c+1
+	}
+}
 	
 patient.raw <- as.data.frame(scale(patient.raw))
 	
 	
-k <- nlevels(factor(patient.clean$Targets))
-km <- kmeans(patient.raw, k)
+k <- nlevels(factor(patient$Targets))
+km <- kmeans(patient.raw, k-1)
 	
 patient.new <- as.data.frame(patient.raw[,1:6])
 patient.new$Predict <- km$cluster
-patient.new$Actual <- as.integer(patient.clean$Targets)
-	
-print(paste("Patient 10"))
+patient.new$Actual <- as.integer(patient$Targets)
 
 conMatrix <- table(patient.new$Predict, patient.new$Actual)
 print(conMatrix)
 
 nmi <- external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
-nmilist <- c(nmilist, nmi)
 print(nmi)
 	
-patient.sample <- patient.new[sample(nrow(patient.new), 300),]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 	
 scatterplot3d(
     patient.sample$FSC.H,
@@ -40,7 +37,8 @@ scatterplot3d(
     patient.sample$FL1.H,
     color = patient.sample$Predict,
     pch = patient.sample$Actual,
-    main = "Patient 10",
+    main = "Patient 10: Scaled, With Polynomial Features",
+    sub = paste("NMI =", nmi, sep = " "),
     xlab = "FSC.H",
     ylab = "SSC.H",
     zlab = "FL1.H"
