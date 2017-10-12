@@ -19,48 +19,6 @@ for (i in 1:9) {
     ), collapse = ''))
   )@exprs)))
   file = gsub(as.character(i), as.character(i + 1), file)
-<<<<<<< HEAD
-=======
-}
-people = append(people, list(as.data.frame(read.FCS(
-  as.character(paste(c(folder, '010.fcs'), collapse = ''))
-)@exprs)))
-people = append(people, list(as.data.frame(read.FCS(
-  as.character(paste(c(folder, '011.fcs'), collapse = ''))
-)@exprs)))
-people = append(people, list(as.data.frame(read.FCS(
-  as.character(paste(c(folder, '012.fcs'), collapse = ''))
-)@exprs)))
-
-# Elbow Plots (Determining K if we didn't have the manual gates)
-nlevels <- c()
-for (i in 1:12) {
-  obj <- factor(people[[i]]$Targets)
-  nlevels <- c(nlevels, nlevels(obj))
-}
-
-scores = list()
-clusters = list()
-for (person in people) {
-  kmscore <- c()
-  for (k in 1:20) {
-    km <- kmeans(person, k, iter.max = 20)
-    kmscore <- c(kmscore, km$betweenss / km$totss)
-  }
-  scores <- c(list(kmscore), scores)
-}
-par(mfrow = c(3, 4))
-for (i in 1:12) {
-  plot <- plot(
-    scores[[i]],
-    type = "p",
-    ylab = "Between SS / Total SS",
-    xlab = "Number of Clusters",
-    main = paste("Patient", i, sep = ' ')
-  )
-  plot <-
-    points(nlevels[i], scores[[i]][nlevels[i]], col = "red", pch = 3)
->>>>>>> ac10aefad2f6dcc0db8a9a2d4a2a2648ee0d9027
 }
 people = append(people, list(as.data.frame(read.FCS(
   as.character(paste(c(folder, '010.fcs'), collapse = ''))
@@ -86,7 +44,6 @@ targets = as.matrix(read.csv(paste(c(folder, '011.csv'), collapse = '')))
 people[[11]]$Targets = targets
 targets = as.matrix(read.csv(paste(c(folder, '012.csv'), collapse = '')))
 people[[12]]$Targets = targets
-
 
 # Elbow Plots (Determining K if we didn't have the manual gates)
 nlevels <- c()
@@ -416,7 +373,6 @@ patient.new$Actual <- as.integer(patient$Targets)
 
 conMatrix <- table(patient.new$Predict, patient.new$Actual)
 print(conMatrix)
-<<<<<<< HEAD
 
 nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
@@ -443,8 +399,6 @@ patient <- people[[10]]
 patient.raw <-
   patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
 
-=======
-
 nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
@@ -470,7 +424,6 @@ patient <- people[[10]]
 patient.raw <-
   patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
 
->>>>>>> ac10aefad2f6dcc0db8a9a2d4a2a2648ee0d9027
 c = 7
 for (i in 1:6) {
   for (j in 1:6) {
@@ -511,11 +464,8 @@ scatterplot3d(
   zlab = "FL1.H"
 )
 
-<<<<<<< HEAD
 # Initial v. Latest Results
 
-=======
->>>>>>> ac10aefad2f6dcc0db8a9a2d4a2a2648ee0d9027
 # Save the patient data in files specified in class
 folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Patient Data/'
 for (i in 1:12) {
