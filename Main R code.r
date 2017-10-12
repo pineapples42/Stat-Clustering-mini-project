@@ -502,3 +502,17 @@ par(mfrow = c(1,1))
 df = as.data.frame(global.nopfeatures)
 df['final'] = nmi_vector_final
 barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Before', 'After'), ylim = c(0,1), main='Initial vs. Final Results', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
+
+# creating and plotting Samspectral results
+# Takes a long time though, don't do it unless you really want to
+library(SamSPECTRAL)
+sam_patient_nmi = c()
+for(i in 1:12){
+  person = people[[i]]
+  sam = SamSPECTRAL(as.matrix(person[1:6]), normal.sigma = 150, separation.factor = .4, number.of.clusters = 5)
+  nmi = external_validation(sam[person$Targets != 0], person$Targets[person$Targets != 0], method = 'nmi')
+  sam_patient_nmi = c(sam_patient_nmi, nmi)
+}
+df = as.data.frame(nmi_vector_initial)
+df['final'] = sam_patient_nmi
+barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Initial Results', 'SamSpectral'), ylim = c(0,1), main='Sam vs Not', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
