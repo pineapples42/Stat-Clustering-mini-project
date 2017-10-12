@@ -1,3 +1,68 @@
+poly = function(a) {
+  c = 7
+  for (i in 1:6) {
+    for (j in 1:6) {
+      a[, c] = a[, j] * a[, i]
+      c = c + 1
+    }
+  }
+  return(a)
+}
+
+global.pfeatures <- c()
+for(i in 1:12){
+  pfeatures <- c()
+  for (variable in 1:20){
+    k <- nlevels(factor(people[[i]]$Targets))
+    people.poly <- poly(people[[i]])
+    km <- kmeans(people.poly, k)
+    nmi <- external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
+    pfeatures <- c(pfeatures, nmi)
+  }
+  global.pfeatures <- c(global.pfeatures, mean(pfeatures))
+}
+
+global.nopfeatures <- c()
+for(i in 1:12){
+  nopfeatures <- c()
+  for (variable in 1:20){
+    k <- nlevels(factor(people[[i]]$Targets))
+    people.poly <- people[[i]][,1:6]
+    km <- kmeans(people.poly, k)
+    nmi <- external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
+    nopfeatures <- c(nopfeatures, nmi)
+  }
+  global.nopfeatures <- c(global.nopfeatures, mean(nopfeatures))
+}
+
+height.pf <- rbind(global.nopfeatures, global.pfeatures)
+
+pf <-
+  barplot(
+    height.pf,
+    beside = TRUE,
+    col = c(4,2),
+    names.arg = 1:12,
+    main = "Polynomial Features Comparison",
+    ylab = "NMI",
+    xlab = "Patient",
+    ylim = c(0, 1),
+    legend.text = c(
+      paste("No Polynomial Features, mean: ", round(mean(global.nopfeatures), 2), sep = ""),
+      paste("With Polynomial Features, mean: ", round(mean(global.pfeatures), 2), sep = "")
+    ),
+    args.legend = list(x = "top", cex = 0.75)
+  )
+
+text(
+  pf,
+  height.pf,
+  labels = format(100* round(height.pf, 2)),
+  pos = 3,
+  cex = 0.6
+)
+
+######
 global.not.scaled.nmi <- c()
 for (i in 1:12) {
   not_scaled_nmi = c()
@@ -33,9 +98,15 @@ mp <-
     beside = TRUE,
     col = colours,
     names.arg = 1:12,
-    main = "NMI, Unscaled v. Scaled\nAverage Across 20 Runs",
+    main = "Scaled vs. Unscaled Comparison",
     ylab = "NMI",
-    ylim = c(0, 1)
+    xlab = "Patient",
+    ylim = c(0, 1),
+    legend.text = c(
+      paste("Unscaled, mean: ", round(mean(global.not.scaled.nmi), 2), sep = ""),
+      paste("Scaled, mean: ", round(mean(global.scaled.nmi), 2), sep = "")
+    ),
+    args.legend = list(x = "top", cex = 0.75)
   )
 
 text(
@@ -44,6 +115,7 @@ text(
   labels = format(100 * round(height.s, 2)),
   pos = 3,
   cex = 0.6
+  
 )
 
 ####
@@ -102,8 +174,14 @@ mp <-
     beside = TRUE,
     col = colours,
     names.arg = 1:12,
-    main = "NMI, Grouped v. Individual",
+    main = "Grouped v. Individually Clustered",
     ylab = "NMI",
+    xlab = "Patient",
+    legend.text = c(
+      paste("Individually clustered, mean: ", round(mean(global_nmi), 2), sep = ""),
+      paste("Grouped and clustered, mean: ", round(mean(everyone_nmi), 2), sep = "")
+    ),
+    args.legend = list(x = "top", cex = 0.75),
     ylim = c(0, 1)
   )
 
@@ -441,3 +519,57 @@ for (i in 1:12) {
   )
   # plot(patient.raw$FSC.H, patient.raw$SSC.H, col=patient.raw$Predict, pch=patient.raw$Actual)
 }
+
+
+######
+
+nlevels <- c()
+for (i in 1:12) {
+  obj <- factor(people[[i]]$Targets)
+  nlevels <- c(nlevels, nlevels(obj))
+}
+
+preprocess <- c()
+par(mfrow = c(3, 4))
+# For each patient:
+for (i in 1:12) {
+  # Create a subset for the patient
+  patient <- people[[i]]
+  # Subset for use in kmeans
+  patient.raw <-
+    patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+  # Run kmeans using nlevels vector from earlier
+  km <- kmeans(patient.raw, nlevels[i] - 1)
+  # Add kmeans predictions to scaled dataframe
+  patient.raw$Predict <- km$cluster
+  # Return actual values to scaled dataframe
+  patient.raw$Actual <- patient$Targets
+  # Create a confusion matrix for the dataframe & print it
+  conMatrix <- table(patient.raw$Predict, patient.raw$Actual)
+  retrieved <- sum(patient.raw$Predict)
+  precision <-
+    sum(patient.raw$Predict & patient.raw$Actual) / retrieved
+  recall <-
+    sum(patient.raw$Predict &
+          patient.raw$Actual) / sum(patient.raw$Actual)
+  Fmeasure <- 2 * precision * recall / (precision + recall)
+  print(conMatrix)
+  print(Fmeasure)
+  nmi <-
+    external_validation(patient.raw$Actual, patient.raw$Predict, method = "nmi")
+  print(nmi)
+  scatterplot3d(
+    patient.raw$FSC.H,
+    patient.raw$SSC.H,
+    patient.raw$FL1.H,
+    color = patient.raw$Predict,
+    pch = patient.raw$Actual,
+    xlab = "FSC.H",
+    ylab = "SSC.H",
+    zlab = "FL1.H",
+    main = paste("Patient", i, sep = " ")
+  )
+  preprocess <- c(preprocess, nmi)
+  # plot(patient.raw$FSC.H, patient.raw$SSC.H, col=patient.raw$Predict, pch=patient.raw$Actual)
+}
+mean(preprocess)
