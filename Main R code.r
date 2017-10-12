@@ -475,3 +475,27 @@ for (i in 1:12) {
        ytrue,
        file = paste(folder, "Patient", i, ".Rdata", sep = ""))
 }
+#creating everyone with patient labels just so the code below works
+everyone = people[[1]]
+everyone['patient'] = rep(1, length(people[[1]]$FSC.H))
+for(i in 2:12){
+  person = people[[i]]
+  person['patient'] = rep(i, length(people[[i]]$FSC.H))
+  everyone = rbind(everyone, person)
+}
+# Creating density plots of fsc.h for each patient
+par(mfrow = c(3,4))
+for(i in 1:12){
+  person = people[[i]]
+  plot(density(person$FSC.H), main = as.character(i))
+}
+# Creating and plotting initial vs final results
+nmi_vector_final = c()
+km_final_results = kmeans(poly(everyone[,1:6]),5)
+for(i in 1:12){
+  patient_eval = external_validation(km_final_results$cluster[everyone$patient == i & everyone$Targets != 0], everyone$Targets[everyone$patient == i & everyone$Targets != 0], method = 'nmi')
+  nmi_vector_final = c(nmi_vector_final, patient_eval)
+}
+df = as.data.frame(global.nopfeatures)
+df['final'] = nmi_vector_final
+barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Before', 'After'), ylim = c(0,1), main='Initial vs. Final Results', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
