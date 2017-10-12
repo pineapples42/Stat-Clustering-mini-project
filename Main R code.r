@@ -6,7 +6,7 @@ library(flowCore)
 #     kmeans(people[[5]], 3)
 #     plot(people[[1]]$FSC.H, people[[1]]$SSC.H)
 # Add your own folder path in folder:
-folder = '/Users/david/Documents/GitHub/Stat-Clustering-mini-project/FlowCore Data/'
+folder = '/Users/david/GitHub/Stat-Clustering-mini-project/FlowCore Data/'
 people = list()
 file = '1'
 ext = '.fcs'
@@ -46,18 +46,21 @@ for(i in 1:12){
 }
 
 #Adding manual gated results to dataframe
-for(i in 1:9){
-  targets = as.matrix(read.csv(paste(c(folder,'00',as.character(i),'.csv'), collapse = '')))
+folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Manual Gates/'
+for (i in 1:9) {
+  targets = as.matrix(read.csv(paste(
+    c(folder, '00', as.character(i), '.csv'), collapse = ''
+  )))
   people[[i]]$Targets = targets
 }
-targets = as.matrix(read.csv(paste(c(folder,'010.csv'), collapse = '')))
+targets = as.matrix(read.csv(paste(c(folder, '010.csv'), collapse = '')))
 people[[10]]$Targets = targets
-targets = as.matrix(read.csv(paste(c(folder,'011.csv'), collapse = '')))
+targets = as.matrix(read.csv(paste(c(folder, '011.csv'), collapse = '')))
 people[[11]]$Targets = targets
-targets = as.matrix(read.csv(paste(c(folder,'012.csv'), collapse = '')))
+targets = as.matrix(read.csv(paste(c(folder, '012.csv'), collapse = '')))
 people[[12]]$Targets = targets
 
-# Running Kmeans with the factor levels given by the manual gates.
+# Polynomial features comparison
 poly = function(a) {
   c = 7
   for (i in 1:6) {
@@ -122,7 +125,7 @@ text(
   cex = 0.6
 )
 
-######
+# Scaled vs. Unscaled
 global.not.scaled.nmi <- c()
 for (i in 1:12) {
   not_scaled_nmi = c()
@@ -178,7 +181,6 @@ text(
   
 )
 
-####
 # NMI for patients when clustered individually
 global_nmi <- c()
 for (index in 1:12) {
@@ -194,7 +196,7 @@ for (index in 1:12) {
   global_nmi <- c(global_nmi, mean(local_nmi))
 }
 
-# Binding everyone and then dividing
+# Binding everyone and then dividing for NMI
 everyone = people[[1]]
 for (i in 2:12) {
   everyone = rbind(everyone, people[[i]])
@@ -215,6 +217,7 @@ ranges <-
     158137:190836,
     190837:207171
   )
+
 everyone_nmi <- c()
 
 km.all <- kmeans(everyone[, 1:6], 5)
@@ -226,7 +229,6 @@ for (range in ranges) {
 
 
 height <- rbind(global_nmi, everyone_nmi)
-
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -252,3 +254,12 @@ text(
   pos = 3,
   cex = 0.6
 )
+
+
+# Save function
+folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Patient Data/'
+for(i in 1:12){
+  patient.matrix <- people[[i]][,1:6]
+  ytrue <- people[[i]][,7]
+  save(patient.matrix, ytrue, file = paste(folder, "Patient", i, ".Rdata", sep=""))
+}
