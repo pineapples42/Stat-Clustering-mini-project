@@ -8,7 +8,8 @@ library(scatterplot3d)
 #     kmeans(people[[5]], 3)
 #     plot(people[[1]]$FSC.H, people[[1]]$SSC.H)
 # Add your own folder path in folder:
-folder = '/Users/david/GitHub/Stat-Clustering-mini-project/FlowCore Data/'
+folder = '/Users/david/GitHub/Stat-Clustering-mini-project/FlowCore Data/' # David
+#folder = '/home/persimmon/Documents/project/' #Max
 people = list()
 file = '1'
 ext = '.fcs'
@@ -31,7 +32,8 @@ people = append(people, list(as.data.frame(read.FCS(
 )@exprs)))
 
 #Adding manual gated results to dataframe
-folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Manual Gates/'
+folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Manual Gates/' # David
+#folder = '/home/persimmon/Documents/project/' #Max
 for (i in 1:9) {
   targets = as.matrix(read.csv(paste(
     c(folder, '00', as.character(i), '.csv'), collapse = ''
@@ -496,6 +498,7 @@ for(i in 1:12){
   patient_eval = external_validation(km_final_results$cluster[everyone$patient == i & everyone$Targets != 0], everyone$Targets[everyone$patient == i & everyone$Targets != 0], method = 'nmi')
   nmi_vector_final = c(nmi_vector_final, patient_eval)
 }
+par(mfrow = c(1,1))
 df = as.data.frame(global.nopfeatures)
 df['final'] = nmi_vector_final
 barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Before', 'After'), ylim = c(0,1), main='Initial vs. Final Results', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
