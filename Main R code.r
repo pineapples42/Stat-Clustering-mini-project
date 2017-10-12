@@ -1,6 +1,8 @@
 library(flowCore)
+library(ClusterR)
+library(scatterplot3d)
 # Info for all 12 people will be stored in the 'people' variable in dataframe format
-# EXAMPLES: 
+# EXAMPLES:
 #     instead of summary(person5), use summary(people[[5]]) (double square brackets are neccesary)
 #     people[[5]]$FSC.H
 #     kmeans(people[[5]], 3)
@@ -11,39 +13,22 @@ people = list()
 file = '1'
 ext = '.fcs'
 for (i in 1:9) {
-  people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'00',file,ext), collapse = '')))@exprs)))
-  file = gsub(as.character(i), as.character(i+1), file)
-             }
-people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'010.fcs'), collapse = '')))@exprs)))
-people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'011.fcs'), collapse = '')))@exprs)))
-people = append(people, list(as.data.frame(read.FCS(as.character(paste(c(folder,'012.fcs'), collapse = '')))@exprs)))
-
-# Elbow Plots (Determining K if we didn't have the manual gates)
-nlevels <- c()
-for (i in 1:12) {
-  obj <- factor(people[[i]]$Targets)
-  nlevels <- c(nlevels, nlevels(obj))
+  people = append(people, list(as.data.frame(read.FCS(
+    as.character(paste(c(
+      folder, '00', file, ext
+    ), collapse = ''))
+  )@exprs)))
+  file = gsub(as.character(i), as.character(i + 1), file)
 }
-
-scores = list()
-clusters = list()
-for(person in people){
-    kmscore <- c()
-    for (k in 1:20) {
-        km <- kmeans(person, k, iter.max = 20)
-        kmscore <- c(kmscore, km$betweenss / km$totss)
-	}
-    scores <- c(list(kmscore), scores)
-}
-par(mfrow = c(3,4))
-for(i in 1:12){
-  plot <- plot(scores[[i]],
-       type = "p",
-       ylab = "Between SS / Total SS",
-       xlab = "Number of Clusters",
-       main = paste("Patient", i, sep = ' '))
-  plot <- points(nlevels[i], scores[[i]][nlevels[i]], col = "red", pch = 3)
-}
+people = append(people, list(as.data.frame(read.FCS(
+  as.character(paste(c(folder, '010.fcs'), collapse = ''))
+)@exprs)))
+people = append(people, list(as.data.frame(read.FCS(
+  as.character(paste(c(folder, '011.fcs'), collapse = ''))
+)@exprs)))
+people = append(people, list(as.data.frame(read.FCS(
+  as.character(paste(c(folder, '012.fcs'), collapse = ''))
+)@exprs)))
 
 #Adding manual gated results to dataframe
 folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Manual Gates/'
@@ -60,7 +45,38 @@ people[[11]]$Targets = targets
 targets = as.matrix(read.csv(paste(c(folder, '012.csv'), collapse = '')))
 people[[12]]$Targets = targets
 
-# Polynomial features comparison
+
+# Elbow Plots (Determining K if we didn't have the manual gates)
+nlevels <- c()
+for (i in 1:12) {
+  obj <- factor(people[[i]]$Targets)
+  nlevels <- c(nlevels, nlevels(obj))
+}
+
+scores = list()
+clusters = list()
+for (person in people) {
+  kmscore <- c()
+  for (k in 1:20) {
+    km <- kmeans(person[,1:6], k, iter.max = 20)
+    kmscore <- c(kmscore, km$betweenss / km$totss)
+  }
+  scores <- c(list(kmscore), scores)
+}
+par(mfrow = c(3, 4))
+for (i in 1:12) {
+  plot <- plot(
+    scores[[i]],
+    type = "p",
+    ylab = "Between SS / Total SS",
+    xlab = "Number of Clusters",
+    main = paste("Patient", i, sep = ' ')
+  )
+  plot <-
+    points(nlevels[i], scores[[i]][nlevels[i]], col = "red", pch = 3)
+}
+
+# Polynomial features v. No poly feat
 poly = function(a) {
   c = 7
   for (i in 1:6) {
@@ -73,26 +89,28 @@ poly = function(a) {
 }
 
 global.pfeatures <- c()
-for(i in 1:12){
+for (i in 1:12) {
   pfeatures <- c()
-  for (variable in 1:20){
+  for (variable in 1:20) {
     k <- nlevels(factor(people[[i]]$Targets))
     people.poly <- poly(people[[i]])
     km <- kmeans(people.poly, k)
-    nmi <- external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
+    nmi <-
+      external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
     pfeatures <- c(pfeatures, nmi)
   }
   global.pfeatures <- c(global.pfeatures, mean(pfeatures))
 }
 
 global.nopfeatures <- c()
-for(i in 1:12){
+for (i in 1:12) {
   nopfeatures <- c()
-  for (variable in 1:20){
+  for (variable in 1:20) {
     k <- nlevels(factor(people[[i]]$Targets))
-    people.poly <- people[[i]][,1:6]
+    people.poly <- people[[i]][, 1:6]
     km <- kmeans(people.poly, k)
-    nmi <- external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
+    nmi <-
+      external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
     nopfeatures <- c(nopfeatures, nmi)
   }
   global.nopfeatures <- c(global.nopfeatures, mean(nopfeatures))
@@ -100,11 +118,12 @@ for(i in 1:12){
 
 height.pf <- rbind(global.nopfeatures, global.pfeatures)
 
+par(mfrow = c(1,1))
 pf <-
   barplot(
     height.pf,
     beside = TRUE,
-    col = c(4,2),
+    col = c(4, 2),
     names.arg = 1:12,
     main = "Polynomial Features Comparison",
     ylab = "NMI",
@@ -120,7 +139,7 @@ pf <-
 text(
   pf,
   height.pf,
-  labels = format(100* round(height.pf, 2)),
+  labels = format(100 * round(height.pf, 2)),
   pos = 3,
   cex = 0.6
 )
@@ -136,7 +155,8 @@ for (i in 1:12) {
       external_validation(people[[i]]$Targets, km$cluster, method = 'nmi')
     not_scaled_nmi = c(not_scaled_nmi, nmi)
   }
-  global.not.scaled.nmi <- c(global.not.scaled.nmi, mean(not_scaled_nmi))
+  global.not.scaled.nmi <-
+    c(global.not.scaled.nmi, mean(not_scaled_nmi))
 }
 
 global.scaled.nmi <- c()
@@ -154,6 +174,7 @@ for (i in 1:12) {
 
 height.s <- rbind(global.not.scaled.nmi, global.scaled.nmi)
 
+par(mfrow = c(1,1))
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -166,7 +187,9 @@ mp <-
     xlab = "Patient",
     ylim = c(0, 1),
     legend.text = c(
-      paste("Unscaled, mean: ", round(mean(global.not.scaled.nmi), 2), sep = ""),
+      paste("Unscaled, mean: ", round(mean(
+        global.not.scaled.nmi
+      ), 2), sep = ""),
       paste("Scaled, mean: ", round(mean(global.scaled.nmi), 2), sep = "")
     ),
     args.legend = list(x = "top", cex = 0.75)
@@ -181,7 +204,7 @@ text(
   
 )
 
-# NMI for patients when clustered individually
+# Grouped v. Individually Clustered
 global_nmi <- c()
 for (index in 1:12) {
   local_nmi <- c()
@@ -196,7 +219,6 @@ for (index in 1:12) {
   global_nmi <- c(global_nmi, mean(local_nmi))
 }
 
-# Binding everyone and then dividing for NMI
 everyone = people[[1]]
 for (i in 2:12) {
   everyone = rbind(everyone, people[[i]])
@@ -229,6 +251,7 @@ for (range in ranges) {
 
 
 height <- rbind(global_nmi, everyone_nmi)
+par(mfrow = c(1,1))
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -255,11 +278,176 @@ text(
   cex = 0.6
 )
 
+# Scatteplot of One Patient, Unscaled without PF
+# Note that the NMI varies significantly across runs
+patient <- people[[10]]
+patient.raw <-
+  patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
 
-# Save function
+k <- nlevels(factor(patient$Targets))
+km <- kmeans(patient.raw, k - 1)
+
+patient.new <- as.data.frame(patient.raw[, 1:6])
+patient.new$Predict <- km$cluster
+patient.new$Actual <- as.integer(patient$Targets)
+
+conMatrix <- table(patient.new$Predict, patient.new$Actual)
+print(conMatrix)
+
+nmi <-
+  external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+print(nmi)
+
+patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+
+scatterplot3d(
+  patient.sample$FSC.H,
+  patient.sample$SSC.H,
+  patient.sample$FL1.H,
+  color = patient.sample$Predict,
+  pch = patient.sample$Actual,
+  main = "Patient 10: Unscaled, No Polynomial Features",
+  sub = paste("NMI =", nmi, sep = " "),
+  xlab = "FSC.H",
+  ylab = "SSC.H",
+  zlab = "FL1.H"
+)
+
+# Scatterplot of one patient, Scaled without PF
+# Note that the NMI varies significantly across runs
+patient <- people[[10]]
+patient.raw <-
+  patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+
+patient.raw <- as.data.frame(scale(patient.raw))
+
+
+k <- nlevels(factor(patient$Targets))
+km <- kmeans(patient.raw, k - 1)
+
+patient.new <- as.data.frame(patient.raw[, 1:6])
+patient.new$Predict <- km$cluster
+patient.new$Actual <- as.integer(patient$Targets)
+
+conMatrix <- table(patient.new$Predict, patient.new$Actual)
+print(conMatrix)
+
+nmi <-
+  external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+print(nmi)
+
+patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+
+scatterplot3d(
+  patient.sample$FSC.H,
+  patient.sample$SSC.H,
+  patient.sample$FL1.H,
+  color = patient.sample$Predict,
+  pch = patient.sample$Actual,
+  main = "Patient 10: Scaled, No Polynomial Features",
+  sub = paste("NMI =", nmi, sep = " "),
+  xlab = "FSC.H",
+  ylab = "SSC.H",
+  zlab = "FL1.H"
+)
+
+# Scatterplot one patient, unscaled with polynomial features
+# Note that the NMI caries significantly across runs
+patient <- people[[10]]
+patient.raw <-
+  patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+
+c = 7
+for (i in 1:6) {
+  for (j in 1:6) {
+    patient.raw[, c] <- patient.raw[, j] * patient.raw[, i]
+    c = c + 1
+  }
+}
+
+k <- nlevels(factor(patient$Targets))
+km <- kmeans(patient.raw, k - 1)
+
+patient.new <- as.data.frame(patient.raw[, 1:6])
+patient.new$Predict <- km$cluster
+patient.new$Actual <- as.integer(patient$Targets)
+
+conMatrix <- table(patient.new$Predict, patient.new$Actual)
+print(conMatrix)
+
+nmi <-
+  external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+print(nmi)
+
+patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+
+scatterplot3d(
+  patient.sample$FSC.H,
+  patient.sample$SSC.H,
+  patient.sample$FL1.H,
+  color = patient.sample$Predict,
+  pch = patient.sample$Actual,
+  main = "Patient 10: Unscaled, With Polynomial Features",
+  sub = paste("NMI =", nmi, sep = " "),
+  xlab = "FSC.H",
+  ylab = "SSC.H",
+  zlab = "FL1.H"
+)
+
+# Scaterrplot of one patient, scaled with polynomial features
+# Note that the NMI varies significantly across runs
+patient <- people[[10]]
+patient.raw <-
+  patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+
+c = 7
+for (i in 1:6) {
+  for (j in 1:6) {
+    patient.raw[, c] <- patient.raw[, j] * patient.raw[, i]
+    c = c + 1
+  }
+}
+
+patient.raw <- as.data.frame(scale(patient.raw))
+
+
+k <- nlevels(factor(patient$Targets))
+km <- kmeans(patient.raw, k - 1)
+
+patient.new <- as.data.frame(patient.raw[, 1:6])
+patient.new$Predict <- km$cluster
+patient.new$Actual <- as.integer(patient$Targets)
+
+conMatrix <- table(patient.new$Predict, patient.new$Actual)
+print(conMatrix)
+
+nmi <-
+  external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+print(nmi)
+
+patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+
+scatterplot3d(
+  patient.sample$FSC.H,
+  patient.sample$SSC.H,
+  patient.sample$FL1.H,
+  color = patient.sample$Predict,
+  pch = patient.sample$Actual,
+  main = "Patient 10: Scaled, With Polynomial Features",
+  sub = paste("NMI =", nmi, sep = " "),
+  xlab = "FSC.H",
+  ylab = "SSC.H",
+  zlab = "FL1.H"
+)
+
+# Initial v. Latest Results
+
+# Save the patient data in files specified in class
 folder = '/Users/david/GitHub/Stat-Clustering-mini-project/Patient Data/'
-for(i in 1:12){
-  patient.matrix <- people[[i]][,1:6]
-  ytrue <- people[[i]][,7]
-  save(patient.matrix, ytrue, file = paste(folder, "Patient", i, ".Rdata", sep=""))
+for (i in 1:12) {
+  patient.matrix <- people[[i]][, 1:6]
+  ytrue <- people[[i]][, 7]
+  save(patient.matrix,
+       ytrue,
+       file = paste(folder, "Patient", i, ".Rdata", sep = ""))
 }
