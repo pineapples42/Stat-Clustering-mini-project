@@ -491,6 +491,40 @@ for(i in 1:12){
   person = people[[i]]
   plot(density(person$FSC.H), main = as.character(i))
 }
+
+# Scatter plot of 12 with kmeans colors and target shapes
+par(mfrow = c(3,4))
+for (i in 1:12){
+  patient <- people[[i]]
+  patient.raw <-
+    patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
+  
+  k <- nlevels(factor(patient$Targets))
+  km <- kmeans(patient.raw, k)
+  
+  patient.new <- patient.raw
+  patient.new$Predict <- km$cluster
+  patient.new$Actual <- as.integer(patient$Targets)
+  
+  conMatrix <- table(patient.new$Predict, patient.new$Actual)
+  print(conMatrix)
+  
+  nmi <- external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+  print(nmi)
+  
+  scatterplot3d(
+    patient.new$FSC.H,
+    patient.new$SSC.H,
+    patient.new$FL1.H,
+    color = patient.new$Predict,
+    pch = patient.new$Actual,
+    main = paste("Patient", i, sep = " "),
+    xlab = "FSC.H",
+    ylab = "SSC.H",
+    zlab = "FL1.H"
+  )
+}
+
 # Creating and plotting initial vs final results
 nmi_vector_final = c()
 km_final_results = kmeans(poly(everyone[,1:6]),5)

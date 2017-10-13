@@ -638,3 +638,11 @@ folder = '/Users/david/Documents/GitHub/Stat-Clustering-mini-project/Patient Dat
 for(i in 1:12){
   save(people[[i]], file = paste(folder, "Patient", i, ".Rdata", sep=""))
 }
+
+
+
+for (patient in people) {
+   x <- sample(length(patient$FSC.H), 500)
+   plot(patient[x,1:6], col = patient$Targets + 1)
+}
+
