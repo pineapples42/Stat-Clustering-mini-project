@@ -7,6 +7,7 @@ library(neuralnet)
 library(NeuralNetTools)
 library(ClusterR)
 library(SamSPECTRAL)
+library(scatterplot3d)
 
 labelnames <- c("L1", "L2", "L3", "L4", "L5")
 nn.nmi <- c()
@@ -60,7 +61,7 @@ for (person in people) {
   print(table(y, yhat))
   
   # Optionally, plot a model of the neural net
-  plotnet(neural)
+  #plotnet(neural)
 }
 
 # For comparison, K-means with polynomial features on all patients grouped, then seperated for evaluation
@@ -128,7 +129,6 @@ for (person in people) {
     separation.factor = .5,
     number.of.clusters = nlevels(factor(patient$Targets))
   )
-  print(levels(as.factor(sam)))
   print(table(sam, patient$Targets))
   nmi <- external_validation(sam, patient$Targets, method = 'nmi')
   sam.nmi = c(sam.nmi, nmi)
@@ -261,4 +261,25 @@ boxplot(
   main = "Comparison of Clustering/Classification Methods"
 )
 
+# RESULTS TABLE
+nmitable <- rbind(km.nmi,kmeans.nmi, sam.nmi, nn.nmi)
+print(round(nmitable, 2))
 
+round(mean(km.nmi), 2)
+round(mean(kmeans.nmi), 2)
+round(mean(sam.nmi), 2)
+round(mean(nn.nmi), 2)
+
+# Looking at Patient 4
+patient4.sample <- people[[4]][sample(nrow(people[[4]]), 1000),]
+
+scatterplot3d(
+  patient4.sample$FSC.H,
+  patient4.sample$SSC.H,
+  patient4.sample$FL1.H,
+  color = as.integer(patient4.sample$Targets) + 1,
+  main = "Patient 4: Problematic Clustering",
+  xlab = "FSC.H",
+  ylab = "SSC.H",
+  zlab = "FL1.H"
+)
