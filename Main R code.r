@@ -59,7 +59,7 @@ clusters = list()
 for (person in people) {
   kmscore <- c()
   for (k in 1:20) {
-    km <- kmeans(person[,1:6], k, iter.max = 20)
+    km <- kmeans(person[, 1:6], k, iter.max = 20)
     kmscore <- c(kmscore, km$betweenss / km$totss)
   }
   scores <- c(list(kmscore), scores)
@@ -119,7 +119,7 @@ for (i in 1:12) {
 
 height.pf <- rbind(global.nopfeatures, global.pfeatures)
 
-par(mfrow = c(1,1))
+par(mfrow = c(1, 1))
 pf <-
   barplot(
     height.pf,
@@ -175,7 +175,7 @@ for (i in 1:12) {
 
 height.s <- rbind(global.not.scaled.nmi, global.scaled.nmi)
 
-par(mfrow = c(1,1))
+par(mfrow = c(1, 1))
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -252,7 +252,7 @@ for (range in ranges) {
 
 
 height <- rbind(global_nmi, everyone_nmi)
-par(mfrow = c(1,1))
+par(mfrow = c(1, 1))
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -299,7 +299,7 @@ nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
 
-patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 
 scatterplot3d(
   patient.sample$FSC.H,
@@ -337,7 +337,7 @@ nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
 
-patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 
 scatterplot3d(
   patient.sample$FSC.H,
@@ -380,7 +380,7 @@ nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
 
-patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 
 scatterplot3d(
   patient.sample$FSC.H,
@@ -405,7 +405,7 @@ nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
 
-patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 
 scatterplot3d(
   patient.sample$FSC.H,
@@ -451,7 +451,7 @@ nmi <-
   external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
 print(nmi)
 
-patient.sample <- patient.new[sample(nrow(patient.new), 1000), ]
+patient.sample <- patient.new[sample(nrow(patient.new), 1000),]
 
 scatterplot3d(
   patient.sample$FSC.H,
@@ -477,24 +477,26 @@ for (i in 1:12) {
        ytrue,
        file = paste(folder, "Patient", i, ".Rdata", sep = ""))
 }
+
 #creating everyone with patient labels just so the code below works
 everyone = people[[1]]
 everyone['patient'] = rep(1, length(people[[1]]$FSC.H))
-for(i in 2:12){
+for (i in 2:12) {
   person = people[[i]]
   person['patient'] = rep(i, length(people[[i]]$FSC.H))
   everyone = rbind(everyone, person)
 }
+
 # Creating density plots of fsc.h for each patient
-par(mfrow = c(3,4))
-for(i in 1:12){
+par(mfrow = c(3, 4))
+for (i in 1:12) {
   person = people[[i]]
   plot(density(person$FSC.H), main = as.character(i))
 }
 
 # Scatter plot of 12 with kmeans colors and target shapes
-par(mfrow = c(3,4))
-for (i in 1:12){
+par(mfrow = c(3, 4))
+for (i in 1:12) {
   patient <- people[[i]]
   patient.raw <-
     patient[c("FSC.H", "SSC.H", "FL1.H", "FL2.H", "FL3.H", "FL4.H")]
@@ -509,7 +511,8 @@ for (i in 1:12){
   conMatrix <- table(patient.new$Predict, patient.new$Actual)
   print(conMatrix)
   
-  nmi <- external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
+  nmi <-
+    external_validation(patient.new$Actual, patient.new$Predict, method = "nmi")
   print(nmi)
   
   scatterplot3d(
@@ -527,26 +530,51 @@ for (i in 1:12){
 
 # Creating and plotting initial vs final results
 nmi_vector_final = c()
-km_final_results = kmeans(poly(everyone[,1:6]),5)
-for(i in 1:12){
-  patient_eval = external_validation(km_final_results$cluster[everyone$patient == i & everyone$Targets != 0], everyone$Targets[everyone$patient == i & everyone$Targets != 0], method = 'nmi')
+km_final_results = kmeans(poly(everyone[, 1:6]), 5)
+for (i in 1:12) {
+  patient_eval = external_validation(km_final_results$cluster[everyone$patient == i &
+                                                                everyone$Targets != 0], everyone$Targets[everyone$patient == i &
+                                                                                                           everyone$Targets != 0], method = 'nmi')
   nmi_vector_final = c(nmi_vector_final, patient_eval)
 }
-par(mfrow = c(1,1))
+par(mfrow = c(1, 1))
 df = as.data.frame(global.nopfeatures)
 df['final'] = nmi_vector_final
-barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Before', 'After'), ylim = c(0,1), main='Initial vs. Final Results', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
+barplot(
+  t(as.matrix(df)),
+  beside = TRUE,
+  legend.text = c('Before', 'After'),
+  ylim = c(0, 1),
+  main = 'Initial vs. Final Results',
+  names.arg = 1:12,
+  args.legend = list(x = "top"),
+  col = c('red', 'blue')
+)
 
 # creating and plotting Samspectral results
 # Takes a long time though, don't do it unless you really want to
 library(SamSPECTRAL)
 sam_patient_nmi = c()
-for(i in 1:12){
+for (i in 1:12) {
   person = people[[i]]
-  sam = SamSPECTRAL(as.matrix(person[1:6]), normal.sigma = 150, separation.factor = .4, number.of.clusters = 5)
+  sam = SamSPECTRAL(
+    as.matrix(person[1:6]),
+    normal.sigma = 150,
+    separation.factor = .4,
+    number.of.clusters = 5
+  )
   nmi = external_validation(sam[person$Targets != 0], person$Targets[person$Targets != 0], method = 'nmi')
   sam_patient_nmi = c(sam_patient_nmi, nmi)
 }
 df = as.data.frame(nmi_vector_initial)
 df['final'] = sam_patient_nmi
-barplot(t(as.matrix(df)), beside = TRUE, legend.text = c('Initial Results', 'SamSpectral'), ylim = c(0,1), main='Sam vs Not', names.arg = 1:12,  args.legend = list(x = "top"), col = c('red','blue'))
+barplot(
+  t(as.matrix(df)),
+  beside = TRUE,
+  legend.text = c('Initial Results', 'SamSpectral'),
+  ylim = c(0, 1),
+  main = 'Sam vs Not',
+  names.arg = 1:12,
+  args.legend = list(x = "top"),
+  col = c('red', 'blue')
+)
