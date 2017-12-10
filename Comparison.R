@@ -7,6 +7,7 @@ library(neuralnet)
 library(NeuralNetTools)
 library(ClusterR)
 library(SamSPECTRAL)
+library(flowMeans)
 library(scatterplot3d)
 
 labelnames <- c("L1", "L2", "L3", "L4", "L5")
@@ -126,13 +127,24 @@ for (person in people) {
   sam <- SamSPECTRAL(
     as.matrix(patient[1:6]),
     normal.sigma = 100,
-    separation.factor = .5,
+    separation.factor = .7,
     number.of.clusters = nlevels(factor(patient$Targets))
   )
   print(table(sam, patient$Targets))
   nmi <- external_validation(sam, patient$Targets, method = 'nmi')
-  sam.nmi = c(sam.nmi, nmi)
+  sam.nmi <- c(sam.nmi, nmi)
 }
+
+# Finally, flowMeans
+fm.nmi <- c()
+for (person in people) {
+  patient <- subset(person, person$Targets != 0)
+  flow <- flowMeans(patient, varNames = names(patient)[1:6], NumC = nlevels(factor(patient$Targets)))
+  print(table(flow@Label, patient$Targets))
+  nmi <- external_validation(flow@Label, patient$Targets, method = 'nmi')
+  fm.nmi <- c(fm.nmi, nmi)
+}
+
 
 # BASIC V PREPROCESSED BARCHART
 barheight2  <- rbind(km.nmi, kmeans.nmi)
@@ -193,8 +205,38 @@ text(
   col = "white"
 )
 
-# KMEANS V MLP BARCHART
-barheight  <- rbind(nn.nmi, kmeans.nmi)
+# KMEANS V FLOWMEANS BARCHART
+barheight4  <- rbind(kmeans.nmi, fm.nmi)
+colours <- c(4, 2)
+mp4 <-
+  barplot(
+    barheight4,
+    beside = TRUE,
+    col = colours,
+    names.arg = 1:12,
+    main = "K-means with PreProcessing v. flowMeans",
+    ylab = "NMI",
+    xlab = "Patient",
+    legend.text = c(
+      paste("K-means, mean: ", round(mean(kmeans.nmi), 2), sep = ""),
+      paste("flowMeans, mean: ", round(mean(fm.nmi), 2), sep = "")
+    ),
+    args.legend = list(x = "bottom", cex = 0.75),
+    ylim = c(0, 1)
+  )
+
+text(
+  mp4,
+  barheight4,
+  labels = format(100 * round(barheight4, 2)),
+  pos = 1,
+  cex = 0.6,
+  col = "white"
+)
+
+
+# FLOWMEANS V MLP BARCHART
+barheight  <- rbind(fm.nmi, nn.nmi)
 colours <- c(4, 2)
 mp <-
   barplot(
@@ -202,12 +244,12 @@ mp <-
     beside = TRUE,
     col = colours,
     names.arg = 1:12,
-    main = "Multilayer Perception v. K-means with PreProcessing",
+    main = "flowMeans v. Multilayer Perception",
     ylab = "NMI",
     xlab = "Patient",
     legend.text = c(
-      paste("MLP, mean: ", round(mean(nn.nmi), 2), sep = ""),
-      paste("K-means, mean: ", round(mean(kmeans.nmi), 2), sep = "")
+      paste("flowMeans, mean: ", round(mean(fm.nmi), 2), sep = ""),
+      paste("MLP, mean: ", round(mean(nn.nmi), 2), sep = "")
     ),
     args.legend = list(x = "bottom", cex = 0.75),
     ylim = c(0, 1)
@@ -239,6 +281,14 @@ boxplot(
   main = "SamSPECTRAL Results"
 )
 
+# FLOW BOXPLOT
+boxplot(
+  fm.nmi,
+  notch = F,
+  col = "orange",
+  main = "flowMeans Results"
+)
+
 
 # MLP BOXPLOT
 boxplot(
@@ -254,20 +304,22 @@ boxplot(
   km.nmi,
   kmeans.nmi,
   sam.nmi,
+  fm.nmi,
   nn.nmi,
-  names = c("Basic K-means", "Preprocessing", "SamSPECTRAL", "Multilayer Perception"),
+  names = c("Basic K-means", "Preprocessing", "SamSPECTRAL", "flowMeans", "Multilayer Perception"),
   notch = F,
   col = "orange",
   main = "Comparison of Clustering/Classification Methods"
 )
 
 # RESULTS TABLE
-nmitable <- rbind(km.nmi,kmeans.nmi, sam.nmi, nn.nmi)
+nmitable <- rbind(km.nmi,kmeans.nmi, sam.nmi, fm.nmi, nn.nmi)
 print(round(nmitable, 2))
 
 round(mean(km.nmi), 2)
 round(mean(kmeans.nmi), 2)
 round(mean(sam.nmi), 2)
+round(mean(fm.nmi), 2)
 round(mean(nn.nmi), 2)
 
 # Looking at Patient 4
